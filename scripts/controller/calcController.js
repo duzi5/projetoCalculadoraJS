@@ -10,6 +10,8 @@ class CalcController {
         this._currentDate;
         this.initialize();
         this.initButtonsEvents();
+        this._lastOperator = ''; 
+        this._lastNumber='';
 
     }
 
@@ -22,6 +24,7 @@ class CalcController {
             this.setDisplayDateTime();
 
         }, 1000);
+        this.setLastNumberToDisplay();
 
     }
 
@@ -38,12 +41,14 @@ class CalcController {
     clearAll(){
 
         this._operation = [];
+        this.setLastNumberToDisplay();
 
     }
 
     clearEntry(){
 
         this._operation.pop();
+        this.setLastNumberToDisplay();
 
     }
 
@@ -77,28 +82,80 @@ class CalcController {
 
     }
 
-    calc(){
+    getResult(){
+        return eval(this._operation.join(""));
+    }
 
-        let last = this._operation.pop();
+
+
+
+
+
+    calc(){
+       
+        let last ='';
+       
+        if(this._operation.length > 3){
+            last = this._operation.pop();
+            this._lastOperator = this.getLastItem();
+            this._lastNumber = this.getResult();
+
+        }
+        
         
         let result = eval(this._operation.join(""));
-
-        this._operation = [result, last];
+        if(last =='%'){
+           result/=100; 
+        }else{
+            this._operation = [result];
+            if(last) this._operation.push(last);
+        }
+        
         this.setLastNumberToDisplay();
 
     }
 
-    setLastNumberToDisplay(){
+    getLastItem(isOperator = true){
+        for (let i =this._operation.length -1; i>=0; i++){
+            if (this.isOperator(this._operation[1])){
+                lastItem= this._operation[i];
+                break;
 
-        let lastNumber; 
-
-        for(let i = this._operation.length-1; i>=0; i--){
-            if(!this.isOperator(this._operation[i])){
-                lastNumber=this._operation[i]
-                break
+            }else { 
+                if(!this.isOperator(this._operation[i])){
+                    lastItem = this._operation[i];
+                    break;
+                }
             }
         }
+        return lastItem;
+    
+    }
+    
+    
+    
+    
+    
+    
+    setLastNumberToDisplay(){
+
+        let lastNumber = this.getLastItem(false);
+
+        if(!lastNumber) lastNumber = 0;
+
         this.displayCalc = lastNumber;
+
+     
+        
+        if(!lastNumber){
+            lastNumber = 0
+        }
+        this.displayCalc = lastNumber;
+
+
+
+
+
     }
 
     addOperation(value){
